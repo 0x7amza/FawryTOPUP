@@ -15,11 +15,12 @@ router.get("/", async (req, res) => {
   const Content = ContentTemp[ContentTemp.length - 1]
     .trim()
     .replace(/^'|'\s*$/g, "");
+  console.log(sender, Content, portNumber);
 
   switch (sender) {
     case "ZAIN-IQ":
       hookUtils.save({ sender, content: Content });
-      ZainService.webhook({ content: Content, portNumber, portID: 2 });
+      ZainService.webhook({ content: Content, portNumber, portID: 1 });
       break;
     default:
       break;

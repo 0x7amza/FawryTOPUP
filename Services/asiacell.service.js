@@ -35,6 +35,18 @@ const GBRecharge = async ({ phone, amount, port }) => {
   };
 
   const response = await serverUtils.sendUssd(queryParam);
+  if (!response.resp) {
+    await portUtils.endProcess({ portID: port.id });
+    return {
+      success: false,
+      result: "Recharge Failed",
+      data: {
+        phone,
+        amount,
+        portID: port.id,
+      },
+    };
+  }
 
   const responseMessage = response.resp
     .normalize("NFKC")
@@ -94,6 +106,17 @@ const ETopUpRecharge = async ({ phone, amount, port }) => {
   };
   const response = await serverUtils.sendUssd(queryParam);
 
+  if (!response.resp) {
+    return {
+      success: false,
+      result: "Recharge Failed",
+      data: {
+        phone,
+        amount,
+        portID: port.id,
+      },
+    };
+  }
   const responseMessage = response.resp
     .normalize("NFKC")
     .replace(/[\u200B-\u200D\uFEFF]/g, "")
@@ -102,7 +125,7 @@ const ETopUpRecharge = async ({ phone, amount, port }) => {
   const pattern =
     /Recharging subscriber (\d+) with Topup IQD, qty (\d+\.\d+) IQD\. Remaining balance (\d+\.\d+) IQD\. TR id: (\d+)\./;
 
-  const match = rechargeMessage.match(pattern);
+  const match = responseMessage.match(pattern);
   if (match) {
     const [fullMessage, remainingBalance, transactionId] = match;
     return {

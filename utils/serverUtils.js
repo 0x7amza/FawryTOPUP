@@ -1,8 +1,6 @@
 const axios = require("axios");
 
 const sendUssd = async (queryParam) => {
-  console.log(queryParam);
-
   const response = await axios.get(
     "http://" +
       queryParam.host.toString() +

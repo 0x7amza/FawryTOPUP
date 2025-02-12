@@ -8,7 +8,7 @@ const recharges = async ({ phone, amount, type, companyID }) => {
 
   switch (type) {
     case "TopUp":
-      const port = await portUtils.choosePort(companyID, amount);
+      var port = await portUtils.choosePort(companyID, amount, type);
 
       if (!port) {
         return "Recharge Failed";
@@ -59,6 +59,10 @@ const webhook = async ({ content, portNumber, portID }) => {
   const zainMap = zainSmsResponses.get(
     portNumber.toString() + portID.toString()
   );
+  console.log(portNumber.toString() + portID.toString());
+  console.log(match);
+  console.log(cleanMessage);
+
   if (match) {
     const phoneNumber = match[1];
     const rechargeAmount = match[2];
