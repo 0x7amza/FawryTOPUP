@@ -17,7 +17,7 @@ module.exports = (Sequelize, DataTypes) => {
       allowNull: false,
     },
     type: {
-      type: DataTypes.ENUM("GB", "topup"),
+      type: DataTypes.ENUM("GB", "topup", "gift"),
       allowNull: false,
     },
     response: {
@@ -25,6 +25,10 @@ module.exports = (Sequelize, DataTypes) => {
       allowNull: true,
     },
     serial: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    PIN: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -51,5 +55,17 @@ module.exports = (Sequelize, DataTypes) => {
       foreignKey: "companyID",
     });
   };
+
+  Recharge.beforeValidate((recharge, options) => {
+    if (recharge.type === "gift" && !recharge.PIN) {
+      throw new Error("The 'pin' field is required when the type is 'gift'.");
+    }
+    if (recharge.type !== "gift" && recharge.PIN) {
+      throw new Error(
+        "The 'pin' field should only be used when the type is 'gift'."
+      );
+    }
+  });
+
   return Recharge;
 };

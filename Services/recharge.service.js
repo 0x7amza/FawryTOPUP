@@ -10,7 +10,7 @@ const db = require("../Models");
  * @param {number} companyID The ID of the company (1 for Asiacell, 2 for Zain and 3 for Korek).
  * @returns {Promise<object>} The response object.
  */
-const recharge = async ({ PhoneNumber, Amount, CompanyId, Type }) => {
+const recharge = async ({ PhoneNumber, Amount, CompanyId, Type, PIN }) => {
   const Company = await db.Company.findOne({
     where: { id: CompanyId },
   });
@@ -29,6 +29,7 @@ const recharge = async ({ PhoneNumber, Amount, CompanyId, Type }) => {
         amount: Amount,
         type: Type,
         companyID: CompanyId,
+        PIN,
       });
     default:
       return null;

@@ -3,17 +3,18 @@ const portUtils = require("../utils/portIUtils");
 const serverUtils = require("../utils/serverUtils");
 const zainSmsResponses = new Map();
 
-const recharges = async ({ phone, amount, type, companyID }) => {
+const recharges = async ({ phone, amount, type, companyID, PIN }) => {
   console.log(type);
 
   switch (type) {
     case "TopUp":
       var port = await portUtils.choosePort(companyID, amount, type);
-
       if (!port) {
         return "Recharge Failed";
       }
       return await ETopUpRecharge({ phone, amount, port });
+    case "gift":
+      return await GiftRecharge({ phone, PIN });
     default:
       return "Recharge Failed";
   }
@@ -108,6 +109,53 @@ const webhook = async ({ content, portNumber, portID }) => {
       await portUtils.endProcess({ portID: portID });
       return "Recharge Failed";
     }
+  }
+};
+
+const GiftRecharge = async ({ PIN, phone }) => {
+  let port = await db.Ports.findOne({
+    where: {
+      status: "active",
+      companyID,
+    },
+    order: [["processingCount", "ASC"]],
+    include: {
+      model: db.Server,
+      where: {
+        status: "active",
+      },
+    },
+  });
+
+  const sendTheGift = await serverUtils.sendUssd({
+    port: port.Server.port,
+    host: port.Server.host,
+    username: port.Server.username,
+    password: port.Server.password,
+    ussd: "*101#" + PIN + "#" + phone + "#",
+  });
+  if (!sendTheGift.resp) {
+    return {
+      success: false,
+      result: "Recharge Failed",
+      data: {
+        phone,
+        amount,
+        portID: port.id,
+      },
+    };
+  }
+  const responseMessage = response.resp;
+  if (responseMessage.includes("تمت عملية التعبئة")) {
+    return {
+      result: responseMessage,
+      success: true,
+    };
+  } else {
+    return {
+      result: responseMessage,
+      success: false,
+    };
   }
 };
 
