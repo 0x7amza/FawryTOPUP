@@ -16,7 +16,10 @@ const recharges = async ({ phone, amount, type, companyID }) => {
     case "TopUp":
       var port = await portUtils.choosePort(companyID, amount, type);
       if (!port) {
-        return null;
+        return {
+          success: false,
+          result: "Recharge Failed",
+        };
       }
       return await ETopUpRecharge({ phone, amount, port });
     default:
