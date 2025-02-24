@@ -14,7 +14,7 @@ const recharges = async ({ phone, amount, type, companyID, PIN }) => {
       }
       return await ETopUpRecharge({ phone, amount, port });
     case "gift":
-      return await GiftRecharge({ phone, PIN });
+      return await GiftRecharge({ phone, PIN, companyID });
     default:
       return "Recharge Failed";
   }
@@ -112,7 +112,7 @@ const webhook = async ({ content, portNumber, portID }) => {
   }
 };
 
-const GiftRecharge = async ({ PIN, phone }) => {
+const GiftRecharge = async ({ PIN, phone, companyID }) => {
   let port = await db.Ports.findOne({
     where: {
       status: "active",
