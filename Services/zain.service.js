@@ -146,7 +146,7 @@ const GiftRecharge = async ({ PIN, phone, companyID }) => {
       },
     };
   }
-  const responseMessage = response.resp;
+  const responseMessage = sendTheGift.resp;
   if (responseMessage.includes("تمت عملية التعبئة")) {
     return {
       result: responseMessage,
