@@ -128,7 +128,8 @@ const GiftRecharge = async ({ PIN, phone, companyID }) => {
   });
 
   const sendTheGift = await serverUtils.sendUssd({
-    port: port.Server.port,
+    portNumber: port.portNumber,
+    ServerPort: port.Server.port,
     host: port.Server.host,
     username: port.Server.username,
     password: port.Server.password,
