@@ -6,8 +6,8 @@ const zainSmsResponses = new Map();
 const recharges = async ({ phone, amount, type, companyID, PIN }) => {
   console.log(type);
 
-  switch (type) {
-    case "TopUp":
+  switch (type.toLowerCase()) {
+    case "topup":
       var port = await portUtils.choosePort(companyID, amount, type);
       if (!port) {
         return "Recharge Failed";

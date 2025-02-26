@@ -3,7 +3,7 @@ const portUtils = require("../utils/portIUtils");
 const serverUtils = require("../utils/serverUtils");
 
 const recharges = async ({ phone, amount, type, companyID }) => {
-  switch (type) {
+  switch (type.toLowerCase()) {
     case "GB":
       var port = await portUtils.choosePort(companyID, amount, type);
       if (!port) {

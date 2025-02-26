@@ -96,7 +96,13 @@ router.post("/", async (req, res) => {
   const recharge = await db.Recharge.findOne({
     where: { RequestId },
   });
-  res.status(200).json({ response, recharge });
+  var statuscode = 200;
+  if (recharge.status === "failed") {
+    statuscode = 500;
+  } else if (recharge.status === "pending") {
+    statuscode = 202;
+  }
+  res.status(statuscode).json(recharge);
 });
 
 module.exports = router;
