@@ -3,6 +3,86 @@ const router = express.Router();
 const db = require("../Models");
 const rechargeService = require("../Services/recharge.service");
 
+/**
+ * @swagger
+ * tags:
+ *   name: Recharge
+ *   description: Recharge management APIs
+ */
+
+/**
+ * @swagger
+ * /api/recharge:
+ *   post:
+ *     summary: Create a new recharge request
+ *     tags: [Recharge]
+ *     description: This endpoint allows creating a new recharge request for a phone number with specified details.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               RequestId:
+ *                 type: integer
+ *                 description: Unique identifier for the recharge request.
+ *               PhoneNumber:
+ *                 type: string
+ *                 description: Phone number to be recharged.
+ *               Amount:
+ *                 type: integer
+ *                 description: Recharge amount.
+ *               CompanyId:
+ *                 type: integer
+ *                 description: ID of the company providing the recharge service.
+ *               Type:
+ *                 type: string
+ *                 enum: ["GB", "topup", "gift"]
+ *                 description: Type of recharge (e.g., "GB", "topup", or "gift").
+ *               PIN:
+ *                 type: string
+ *                 description: PIN code for gift-type recharges (optional unless Type is "gift").
+ *               serial:
+ *                 type: string
+ *                 description: Serial number for gift-type recharges (optional unless Type is "gift").
+ *             required:
+ *               - RequestId
+ *               - PhoneNumber
+ *               - Amount
+ *               - CompanyId
+ *               - Type
+ *     responses:
+ *       200:
+ *         description: Recharge request processed successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Recharge'
+ *       202:
+ *         description: Recharge request is pending.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Recharge'
+ *       400:
+ *         description: Missing required fields in the request body.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message indicating missing fields.
+ *       500:
+ *         description: Recharge request failed due to an error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Recharge'
+ */
+
 router.post("/", async (req, res) => {
   const { RequestId, PhoneNumber, Amount, CompanyId, Type, PIN, serial } =
     req.body;

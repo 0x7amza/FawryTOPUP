@@ -9,6 +9,8 @@ module.exports = (Sequelize, DataTypes) => {
           model: "Servers",
           key: "id",
         },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
       },
       portNumber: {
         type: DataTypes.INTEGER,
@@ -78,6 +80,8 @@ module.exports = (Sequelize, DataTypes) => {
     Ports.belongsTo(models.Server, {
       foreignKey: "serverID",
       targetKey: "id",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     });
     Ports.hasMany(models.Recharge, {
       foreignKey: "portID",
