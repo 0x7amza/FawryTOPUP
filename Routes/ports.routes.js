@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const portsController = require("../controllers/ports.controller");
+const portsController = require("../Controllers/ports.controller");
 
 /**
  * @swagger
