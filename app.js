@@ -8,7 +8,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-
+const queryInterface = db.sequelize.getQueryInterface();
+const seedCompanies = require("./seeders/20250201164345-add-default-companies");
 app.use("/api", require("./Routes/index"));
 
 app.use(errorHandler);
@@ -48,5 +49,7 @@ db.sequelize
     console.log("Failed to sync db: " + err.message);
     logger.error("Failed to sync db: " + err.message);
   });
+
+seedCompanies.up(queryInterface, db.Sequelize);
 
 module.exports = app;

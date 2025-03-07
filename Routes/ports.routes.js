@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const portsController = require("../controllers/ports.controller");
+const portsController = require("../Controllers/ports.controller");
 
 /**
  * @swagger
@@ -178,18 +178,18 @@ router.put("/:id", portsController.update);
  * @swagger
  * /api/ports/{id}:
  *   delete:
- *     summary: Delete a port by ID
+ *     summary: Toggle the deletion status of a port by ID
  *     tags: [Ports]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: Numeric ID of the port to delete
+ *         description: Numeric ID of the port to toggle its deletion status
  *         schema:
  *           type: integer
  *     responses:
  *       200:
- *         description: Success message
+ *         description: Success message indicating the toggle was successful
  *         content:
  *           application/json:
  *             schema:
@@ -197,7 +197,7 @@ router.put("/:id", portsController.update);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: Success message
+ *                   description: Success message (e.g., "Port toggled successfully!")
  *       404:
  *         description: Port not found
  *         content:
@@ -207,7 +207,7 @@ router.put("/:id", portsController.update);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: Error message
+ *                   description: Error message (e.g., "Port with id=1 not found!")
  *       500:
  *         description: Server error
  *         content:
@@ -217,9 +217,9 @@ router.put("/:id", portsController.update);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: Error message
+ *                   description: Error message (e.g., "Error toggling port status")
  */
-router.delete("/:id", portsController.remove);
+router.delete("/:id", portsController.togglePortDeletion);
 
 /**
  * @swagger

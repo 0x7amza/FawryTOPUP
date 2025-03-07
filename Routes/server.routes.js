@@ -10,7 +10,7 @@ const serverController = require("../Controllers/servers.controller");
 
 /**
  * @swagger
- * /servers:
+ * /api/servers:
  *   post:
  *     summary: Create a new server
  *     tags: [Servers]
@@ -52,7 +52,7 @@ router.post("/", serverController.create);
 
 /**
  * @swagger
- * /servers:
+ * /api/servers:
  *   get:
  *     summary: Retrieve all servers
  *     tags: [Servers]
@@ -80,7 +80,7 @@ router.get("/", serverController.findAll);
 
 /**
  * @swagger
- * /servers/{id}:
+ * /api/servers/{id}:
  *   get:
  *     summary: Retrieve a single server by ID
  *     tags: [Servers]
@@ -123,7 +123,7 @@ router.get("/:id", serverController.findOne);
 
 /**
  * @swagger
- * /servers/{id}:
+ * /api/servers/{id}:
  *   put:
  *     summary: Update a server by ID
  *     tags: [Servers]
@@ -176,20 +176,20 @@ router.put("/:id", serverController.update);
 
 /**
  * @swagger
- * /servers/{id}:
+ * /api/servers/{id}:
  *   delete:
- *     summary: Delete a server by ID
+ *     summary: Toggle the deletion status of a server by ID
  *     tags: [Servers]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: Numeric ID of the server to delete
+ *         description: Numeric ID of the server to toggle its deletion status
  *         schema:
  *           type: integer
  *     responses:
  *       200:
- *         description: Success message
+ *         description: Success message indicating the toggle was successful
  *         content:
  *           application/json:
  *             schema:
@@ -197,7 +197,7 @@ router.put("/:id", serverController.update);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: Success message
+ *                   description: Success message (e.g., "Server toggled successfully!")
  *       404:
  *         description: Server not found
  *         content:
@@ -207,7 +207,7 @@ router.put("/:id", serverController.update);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: Error message
+ *                   description: Error message (e.g., "Server with id=1 not found!")
  *       500:
  *         description: Server error
  *         content:
@@ -217,8 +217,8 @@ router.put("/:id", serverController.update);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: Error message
+ *                   description: Error message (e.g., "Error toggling server status")
  */
-router.delete("/:id", serverController.remove);
+router.delete("/:id", serverController.invertServerDeletion);
 
 module.exports = router;

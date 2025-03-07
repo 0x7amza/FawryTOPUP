@@ -133,3 +133,31 @@
  *         - username
  *         - password
  */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Company:
+ *       type: object
+ *       required:
+ *         - id
+ *         - name
+ *         - createdAt
+ *         - updatedAt
+ *       properties:
+ *         id:
+ *           type: integer
+ *           example: 1
+ *         name:
+ *           type: string
+ *           example: "اسياسيل"
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           example: "2024-03-07T12:00:00Z"
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           example: "2024-03-07T12:30:00Z"
+ */

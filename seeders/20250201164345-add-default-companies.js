@@ -3,6 +3,10 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
+    // حذف جميع البيانات القديمة
+    await queryInterface.bulkDelete("companies", null, {});
+
+    // إدخال البيانات الجديدة
     await queryInterface.bulkInsert(
       "companies",
       [
@@ -30,11 +34,7 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    /**
-     * Add commands to revert seed here.
-     *
-     * Example:
-     * await queryInterface.bulkDelete('People', null, {});
-     */
+    // حذف البيانات عند التراجع
+    await queryInterface.bulkDelete("companies", null, {});
   },
 };

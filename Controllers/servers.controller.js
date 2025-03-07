@@ -1,11 +1,18 @@
-const db = require("../models");
+const db = require("../Models");
 const Server = db.Server;
 const Op = db.Sequelize.Op;
 
 // Create and Save a new Server
 const create = (req, res) => {
   // Validate request
-  if (!req.body.serverName) {
+  if (
+    !req.body.name ||
+    !req.body.host ||
+    !req.body.port ||
+    !req.body.username ||
+    !req.body.password ||
+    !req.body.maxPortCount
+  ) {
     res.status(400).send({
       message: "Content can not be empty!",
     });
@@ -14,8 +21,14 @@ const create = (req, res) => {
 
   // Create a Server
   const server = {
-    serverName: req.body.serverName,
-    status: req.body.status ? req.body.status : "active",
+    name: req.body.name,
+    host: req.body.host,
+    port: req.body.port,
+    username: req.body.username,
+    password: req.body.password,
+    status: "active",
+    maxPortCount: req.body.maxPortCount,
+    isDeleted: false,
   };
 
   // Save Server in the database
@@ -24,6 +37,8 @@ const create = (req, res) => {
       res.send(data);
     })
     .catch((err) => {
+      console.log(err);
+
       res.status(500).send({
         message:
           err.message || "Some error occurred while creating the Server.",
@@ -90,27 +105,28 @@ const update = (req, res) => {
     });
 };
 
-// Delete a Server with the specified id in the request
-const remove = (req, res) => {
+// Delete || unDelete a Server with the specified id (soft delete)
+const invertServerDeletion = (req, res) => {
   const id = req.params.id;
 
-  Server.destroy({
-    where: { id: id },
-  })
+  Server.update(
+    { isDeleted: Sequelize.literal("NOT isDeleted") },
+    { where: { id: id } }
+  )
     .then((num) => {
       if (num == 1) {
         res.send({
-          message: "Server was deleted successfully!",
+          message: "Server toggled successfully!",
         });
       } else {
         res.send({
-          message: `Cannot delete Server with id=${id}. Maybe Server was not found!`,
+          message: `Server with id=${id} not found!`,
         });
       }
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Could not delete Server with id=" + id,
+        message: "Error toggling server with id=" + id,
       });
     });
 };
@@ -120,5 +136,5 @@ module.exports = {
   findAll,
   findOne,
   update,
-  remove,
+  invertServerDeletion,
 };

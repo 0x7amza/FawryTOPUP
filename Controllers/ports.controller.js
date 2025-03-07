@@ -1,3 +1,4 @@
+const { where } = require("sequelize");
 const db = require("../Models");
 const Ports = db.Ports;
 const Op = db.Sequelize.Op;
@@ -5,7 +6,18 @@ const Op = db.Sequelize.Op;
 // Create and Save a new Port
 const create = (req, res) => {
   // Validate request
-  if (!req.body.portNumber) {
+  if (
+    req.body.portNumber == undefined ||
+    req.body.serverID == undefined ||
+    req.body.companyID == undefined ||
+    req.body.type == undefined ||
+    req.body.balance == undefined ||
+    req.body.phoneNumber == undefined ||
+    req.body.simPassword == undefined ||
+    req.body.maxDailyRechargeAmount == undefined
+  ) {
+    console.log(req.body);
+
     res.status(400).send({
       message: "Content can not be empty!",
     });
@@ -14,9 +26,18 @@ const create = (req, res) => {
 
   // Create a Port
   const port = {
-    portNumber: req.body.portNumber,
-    status: req.body.status ? req.body.status : "active",
     serverID: req.body.serverID,
+    portNumber: req.body.portNumber,
+    companyID: req.body.companyID,
+    type: req.body.type,
+    balance: req.body.balance,
+    status: req.body.status || "active",
+    phoneNumber: req.body.phoneNumber,
+    simPassword: req.body.simPassword,
+    maxDailyRechargeAmount: req.body.maxDailyRechargeAmount,
+    dailyRechargeCount: 0,
+    processingCount: 0,
+    isDeleted: false,
   };
 
   // Save Port in the database
@@ -33,7 +54,9 @@ const create = (req, res) => {
 
 // Retrieve all Ports from the database.
 const findAll = (req, res) => {
-  Ports.findAll({ include: ["server"] })
+  const status = req.query.status || "";
+  var condition = status ? { status: { [Op.eq]: status } } : null;
+  Ports.findAll({ include: ["Server"], where: condition })
     .then((data) => {
       res.send(data);
     })
@@ -48,7 +71,7 @@ const findAll = (req, res) => {
 const findOne = (req, res) => {
   const id = req.params.id;
 
-  Ports.findByPk(id, { include: ["server"] })
+  Ports.findByPk(id, { include: ["Server"] })
     .then((data) => {
       if (!data) {
         res.status(404).send({
@@ -106,27 +129,27 @@ const update = (req, res) => {
     });
 };
 
-// Delete a Port with the specified id in the request
-const remove = (req, res) => {
+const togglePortDeletion = (req, res) => {
   const id = req.params.id;
 
-  Ports.destroy({
-    where: { id: id },
-  })
+  Ports.update(
+    { isDeleted: Sequelize.literal("NOT isDeleted") },
+    { where: { id: id } }
+  )
     .then((num) => {
       if (num == 1) {
         res.send({
-          message: "Port was deleted successfully!",
+          message: "Port toggled successfully!",
         });
       } else {
         res.send({
-          message: `Cannot delete Port with id=${id}. Maybe Port was not found!`,
+          message: `Cannot toggle Port with id=${id}. Maybe Port was not found!`,
         });
       }
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Could not delete Port with id=" + id,
+        message: "Error toggling Port with id=" + id,
       });
     });
 };
@@ -137,5 +160,5 @@ module.exports = {
   findOne,
   update,
   findAllByServer,
-  remove,
+  togglePortDeletion,
 };
