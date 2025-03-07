@@ -1,2 +1,4 @@
 node_modules
 combined.log
+.env
+./config/config.js

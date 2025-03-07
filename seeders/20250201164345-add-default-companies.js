@@ -4,7 +4,7 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     // حذف جميع البيانات القديمة
-    await queryInterface.bulkDelete("companies", null, {});
+    await queryInterface.bulkDelete("Companies", null, {});
 
     // إدخال البيانات الجديدة
     await queryInterface.bulkInsert(
@@ -35,6 +35,6 @@ module.exports = {
 
   async down(queryInterface, Sequelize) {
     // حذف البيانات عند التراجع
-    await queryInterface.bulkDelete("companies", null, {});
+    await queryInterface.bulkDelete("Companies", null, {});
   },
 };
