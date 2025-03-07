@@ -8,7 +8,7 @@ module.exports = {
 
     // إدخال البيانات الجديدة
     await queryInterface.bulkInsert(
-      "companies",
+      "Companies",
       [
         {
           id: 1,
