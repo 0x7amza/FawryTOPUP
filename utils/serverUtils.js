@@ -5,7 +5,7 @@ const sendUssd = async (queryParam) => {
     "http://" +
       queryParam.host.toString() +
       ":" +
-      queryParam.ServerPort +
+      queryParam.port +
       "/goip_send_ussd.html?username=" +
       queryParam.username +
       "&password=" +

@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const hookUtils = require("../utils/hookUtils");
 const ZainService = require("../Services/zain.service");
+const KorekService = require("../Services/korek.service");
+const db = require("../Models");
+const Ports = db.Ports;
 
 router.get("/", async (req, res) => {
   const { query } = req;
@@ -16,12 +19,24 @@ router.get("/", async (req, res) => {
     .trim()
     .replace(/^'|'\s*$/g, "");
   console.log(sender, Content, portNumber);
-
+  const port = await db.Ports.findOne({
+    where: { portNumber },
+    include: [
+      {
+        model: db.Server,
+        where: { host: ip },
+      },
+    ],
+  });
+  const portID = port.id;
   switch (sender) {
     case "ZAIN-IQ":
       hookUtils.save({ sender, content: Content });
       ZainService.webhook({ content: Content, portNumber, portID: 1 });
       break;
+    case "Korek":
+      hookUtils.save({ sender, content: Content });
+      KorekService.webhook({ content, portID });
     default:
       break;
   }

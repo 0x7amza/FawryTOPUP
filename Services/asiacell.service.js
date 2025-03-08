@@ -16,7 +16,7 @@ const recharges = async ({ phone, amount, port }) => {
 const GBRecharge = async ({ phone, amount, port }) => {
   const queryParam = {
     host: port.Server.host,
-    ServerPort: port.Server.port,
+    port: port.Server.port,
     portNumber: port.portNumber,
     username: port.Server.username,
     password: port.Server.password,
@@ -148,7 +148,7 @@ const updateBalance = async (port) => {
   }
   const response = await serverUtils.sendUssd({
     host: port.Server.host,
-    port: port.Server.port,
+    port: port.Server.ServerPort,
     portNumber: port.portNumber,
     username: port.Server.username,
     password: port.Server.password,
