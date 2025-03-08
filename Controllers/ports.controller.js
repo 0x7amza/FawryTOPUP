@@ -5,6 +5,7 @@ const Op = db.Sequelize.Op;
 const Asiacell = require("../Services/asiacell.service");
 const Zain = require("../Services/zain.service");
 const korek = require("../Services/korek.service");
+const { error } = require("winston");
 
 // Create and Save a new Port
 const create = (req, res) => {
@@ -159,35 +160,49 @@ const togglePortDeletion = (req, res) => {
 
 const updateBalance = async (req, res) => {
   const id = req.params.id;
-  const port = await Ports.findByPk(id, { include: ["Server", "Company"] });
-  if (port == null) {
-    res.status(404).send({
-      message: "Not found Port with id " + id,
+  const port = await Ports.findByPk(id, {
+    include: ["Server", "Company"],
+  });
+
+  if (!port) {
+    return res.status(404).send({
+      message: "Port not found with id " + id,
     });
-    return;
   }
-  let Balance = "";
+
+  let newBalance;
   switch (port.Company.name) {
     case "اسياسيل":
-      Balance = await Asiacell.updateBalance(port);
+      newBalance = await Asiacell.updateBalance(port);
       break;
     case "زين":
-      Balance = await Zain.updateBalance(port);
+      newBalance = await Zain.updateBalance(port).balance;
       break;
     case "كورك":
-      Balance = await korek.checkBalance(port);
+      newBalance = await korek.checkBalance(port).balance;
       break;
     default:
-      res.status(400).send({
-        message: "Company is not supported",
+      return res.status(400).send({
+        message: "Unsupported company",
       });
-      return;
   }
-  res.send({
-    Balance,
-  });
-};
 
+  if (typeof newBalance === "number" && !isNaN(newBalance)) {
+    port.balance = newBalance;
+    await port.save();
+    return res.status(200).send({
+      message: "Balance updated successfully",
+      balance: newBalance,
+      portID: port.id,
+    });
+  } else {
+    return res.status(500).send({
+      message: "Failed to update balance",
+      error: "Invalid response from service",
+      rawBalance: newBalance,
+    });
+  }
+};
 module.exports = {
   create,
   findAll,
