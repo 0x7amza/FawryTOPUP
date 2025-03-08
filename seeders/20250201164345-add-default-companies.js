@@ -3,10 +3,14 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    // حذف جميع البيانات القديمة
-    await queryInterface.bulkDelete("Companies", null, {});
+    //check if table is empty
+    const companies = await queryInterface.sequelize.query(
+      `SELECT * FROM Companies`
+    );
 
-    // إدخال البيانات الجديدة
+    if (companies[0].length > 0) {
+      return;
+    }
     await queryInterface.bulkInsert(
       "Companies",
       [

@@ -6,15 +6,9 @@ const zainSmsResponses = new Map();
 const recharges = async ({ phone, amount, type, companyID, PIN }) => {
   console.log(type);
 
-  switch (type.toLowerCase()) {
+  switch (port.type.toLowerCase()) {
     case "topup":
-      var port = await portUtils.choosePort(companyID, amount, type);
-      if (!port) {
-        return "Recharge Failed";
-      }
       return await ETopUpRecharge({ phone, amount, port });
-    case "gift":
-      return await GiftRecharge({ phone, PIN, companyID });
     default:
       return "Recharge Failed";
   }
@@ -40,75 +34,111 @@ const ETopUpRecharge = async ({ phone, amount, port }) => {
       phone: newPhone,
       amount,
     });
-    setTimeout(() => {
-      zainSmsResponses.delete(newPhone);
-      reject("Recharge Failed");
-    }, 60000);
+    setTimeout(
+      () => async () => {
+        zainSmsResponses.delete(newPhone);
+        const CheckBalance = await updateBalance(port);
+        if (CheckBalance !== "update balance Failed") {
+          if (CheckBalance < port.balance) {
+            resolve("Recharge Successful");
+          } else {
+            reject("Recharge Failed");
+          }
+        }
+        reject("Recharge Failed");
+      },
+      60000
+    );
   });
 
   return result;
 };
-
 const webhook = async ({ content, portNumber, portID }) => {
   const cleanMessage = content
     .normalize("NFKC")
     .replace(/[\u200B-\u200D\uFEFF]/g, "")
     .trim();
-  const pattern =
-    /The number (\d{13}) has been successfully recharged with ([\d,]+\.\d{3}) IQD on (\d{2}\/\d{2}\/\d{2} \d{2}:\d{2} [APM]{2}) Your current balance is ([\d,]+\.\d{3}) IQD.Transaction number ([A-Z0-9]+)/;
-  const match = cleanMessage.match(pattern);
+
+  // 1. نمط النجاح (شحن الرصيد)
+  const successPattern =
+    /The number (\d{13}) has been successfully recharged with ([\d,]+\.\d{3}) IQD on ([\d\/ :APM]+)\. Your current balance is ([\d,]+\.\d{3}) IQD\. Transaction number ([A-Z0-9]+)/i;
+  const successMatch = cleanMessage.match(successPattern);
+
+  // 2. نمط الرصيد (المُحدّث ليتقبل صيغًا مختلفة)
+  const balancePattern =
+    /available balance is (\d{1,3}(?:,\d{3})*(?:\.\d{1,3})?) IQD/i;
+  const balanceMatch = cleanMessage.match(balancePattern);
+
   const zainMap = zainSmsResponses.get(
     portNumber.toString() + portID.toString()
   );
-  console.log(portNumber.toString() + portID.toString());
-  console.log(match);
-  console.log(cleanMessage);
 
-  if (match) {
-    const phoneNumber = match[1];
-    const rechargeAmount = match[2];
-    const currentBalance = match[4];
-    const transactionNumber = match[5];
+  if (successMatch && zainMap?.phone === successMatch[1]) {
+    const [phone, amount, date, currentBalance, transaction] = successMatch;
+    const numericBalance = parseFloat(currentBalance.replace(/,/g, "")) || 0;
 
-    if (zainMap.phone === phoneNumber) {
-      zainMap.resolve({
-        result: content,
-        success: true,
-        data: {
-          phone: zainMap.phone,
-          amount: zainMap.amount,
-          currentBalance: currentBalance,
-          transactionNumber: transactionNumber,
-          portID,
-        },
-      });
-      await portUtils.endProcess({ portID });
-      return "Recharge Successful";
+    await db.Ports.update(
+      { balance: numericBalance },
+      { where: { portNumber } }
+    );
+
+    zainMap.resolve({
+      success: true,
+      data: {
+        phone,
+        amount: parseFloat(amount.replace(/,/g, "")),
+        balance: numericBalance,
+        transaction,
+        portID,
+      },
+    });
+    await portUtils.endProcess({ portID });
+  } else if (balanceMatch) {
+    const balanceValue = balanceMatch[1].replace(/,/g, "").replace(/\.0+$/, "");
+    const numericBalance = parseFloat(balanceValue) || 0;
+
+    await db.Ports.update(
+      { balance: numericBalance },
+      { where: { portNumber } }
+    );
+
+    if (zainMap?.updateBalance) {
+      zainMap.resolve({ success: true, balance: numericBalance });
     }
-    return "Recharge Successful";
   } else {
-    const balancePattern = /your available balance is ([\d,]+\.\d{3}) IQD/;
-    const match = cleanMessage.match(balancePattern);
-    if (match) {
-      const availableBalance = match[1].replaceAll(",", "").replace(".000", "");
-      await db.Ports.update(
-        { availableBalance: availableBalance },
-        { where: { portNumber: portNumber } }
-      );
-      return "";
-    } else {
-      zainMap.resolve({
-        result: content,
-        success: false,
-        data: {
-          amount: zainMap.amount,
-          phone: zainMap.phone,
-          portID,
-        },
+    // حالة الفشل
+    zainMap?.resolve({ success: false, error: "Unknown response format" });
+    await portUtils.endProcess({ portID });
+  }
+};
+
+const updateBalance = async (port) => {
+  try {
+    const sendSms = await serverUtils.sendSms({
+      phone: port.phoneNumber,
+      portNumber: port.portNumber,
+      sms: "gb",
+      to: "2026",
+      port: port.Server.port,
+      host: port.Server.host,
+      username: port.Server.username,
+      password: port.Server.password,
+    });
+
+    return new Promise((resolve, reject) => {
+      zainSmsResponses.set(port.portNumber + port.id.toString(), {
+        resolve,
+        reject,
+        updateBalance: true,
       });
-      await portUtils.endProcess({ portID: portID });
-      return "Recharge Failed";
-    }
+
+      setTimeout(() => {
+        zainSmsResponses.delete(port.portNumber + port.id.toString());
+        reject("Update balance timed out");
+      }, 60000);
+    });
+  } catch (error) {
+    throw new Error("Failed to update balance");
   }
 };
 
@@ -160,4 +190,4 @@ const GiftRecharge = async ({ PIN, phone, companyID }) => {
   }
 };
 
-module.exports = { recharges, webhook };
+module.exports = { recharges, webhook, updateBalance };

@@ -10,26 +10,27 @@ const db = require("../Models");
  * @param {number} companyID The ID of the company (1 for Asiacell, 2 for Zain and 3 for Korek).
  * @returns {Promise<object>} The response object.
  */
-const recharge = async ({ PhoneNumber, Amount, CompanyId, Type, PIN }) => {
-  const Company = await db.Company.findOne({
-    where: { id: CompanyId },
-  });
+const recharge = async ({ PhoneNumber, Amount, port }) => {
+  const Company = port.Company;
 
   switch (Company.name) {
     case "اسياسيل":
       return await Asiacell.recharges({
         phone: PhoneNumber,
         amount: Amount,
-        type: Type,
-        companyID: CompanyId,
+        port,
       });
     case "زين":
       return await Zain.recharges({
         phone: PhoneNumber,
         amount: Amount,
-        type: Type,
-        companyID: CompanyId,
-        PIN,
+        port,
+      });
+    case "كورك":
+      return await korek.recharges({
+        phone: PhoneNumber,
+        amount: Amount,
+        port,
       });
     default:
       return null;

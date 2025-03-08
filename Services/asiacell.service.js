@@ -2,25 +2,11 @@ const db = require("../Models");
 const portUtils = require("../utils/portIUtils");
 const serverUtils = require("../utils/serverUtils");
 
-const recharges = async ({ phone, amount, type, companyID }) => {
-  switch (type.toLowerCase()) {
-    case "GB":
-      var port = await portUtils.choosePort(companyID, amount, type);
-      if (!port) {
-        return {
-          success: false,
-          result: "Recharge Failed",
-        };
-      }
+const recharges = async ({ phone, amount, port }) => {
+  switch (port.type.toLowerCase()) {
+    case "gb":
       return await GBRecharge({ phone, amount, port });
-    case "TopUp":
-      var port = await portUtils.choosePort(companyID, amount, type);
-      if (!port) {
-        return {
-          success: false,
-          result: "Recharge Failed",
-        };
-      }
+    case "topup":
       return await ETopUpRecharge({ phone, amount, port });
     default:
       return null;
@@ -70,7 +56,7 @@ const GBRecharge = async ({ phone, amount, port }) => {
       data: {
         phone,
         amount,
-        currentBalance: port.balance - amount - transactionFee,
+        balance: port.balance - amount - transactionFee,
         transactionNumber: "GB-" + Math.floor(100000 + Math.random() * 900000), //random number
         portID: port.id,
       },
@@ -137,7 +123,7 @@ const ETopUpRecharge = async ({ phone, amount, port }) => {
       data: {
         phone,
         amount,
-        currentBalance: remainingBalance.replace(".000", ""),
+        balance: remainingBalance.replace(".000", ""),
         transactionNumber: transactionId,
         portID: port.id,
       },
@@ -155,6 +141,35 @@ const ETopUpRecharge = async ({ phone, amount, port }) => {
   }
 };
 
+const updateBalance = async (port) => {
+  let ussd = "*322*125*" + port.simPassword + "*2#";
+  if (port.type === "GB") {
+    ussd = "*133#";
+  }
+  const response = await serverUtils.sendUssd({
+    host: port.Server.host,
+    port: port.Server.port,
+    portNumber: port.portNumber,
+    username: port.Server.username,
+    password: port.Server.password,
+    ussd: ussd,
+  });
+
+  response.resp = response.resp.replace(".000", "");
+  const match = response.resp.match(/([\d,]+)\sIQD/);
+  const numberWithoutCommas = match ? match[1].replace(/,/g, "") : null;
+
+  const balance = numberWithoutCommas ? parseInt(numberWithoutCommas) : null;
+  if (balance) {
+    port.balance = balance;
+    await port.save();
+    return balance;
+  } else {
+    return "update balance Failed";
+  }
+};
+
 module.exports = {
   recharges,
+  updateBalance,
 };

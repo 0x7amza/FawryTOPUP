@@ -34,7 +34,7 @@ module.exports = (Sequelize, DataTypes) => {
     },
     portID: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: "Ports",
         key: "id",

@@ -2,6 +2,9 @@ const { where } = require("sequelize");
 const db = require("../Models");
 const Ports = db.Ports;
 const Op = db.Sequelize.Op;
+const Asiacell = require("../Services/asiacell.service");
+const Zain = require("../Services/zain.service");
+const korek = require("../Services/korek.service");
 
 // Create and Save a new Port
 const create = (req, res) => {
@@ -154,6 +157,34 @@ const togglePortDeletion = (req, res) => {
     });
 };
 
+const updateBalance = async (req, res) => {
+  const id = req.params.id;
+  const port = await Ports.findByPk(id, { include: ["Server", "Company"] });
+  if (port == null) {
+    res.status(404).send({
+      message: "Not found Port with id " + id,
+    });
+    return;
+  }
+  const Balance = 0;
+  switch (port.Company.name) {
+    case "اسياسيل":
+      Balance = await Asiacell.updateBalance(port);
+      break;
+    case "زين":
+      Balance = await Zain.updateBalance(port);
+      break;
+    case "كورك":
+      port.balance = req.body.balance;
+      break;
+    default:
+      res.status(400).send({
+        message: "Company is not supported",
+      });
+      return;
+  }
+};
+
 module.exports = {
   create,
   findAll,
@@ -161,4 +192,5 @@ module.exports = {
   update,
   findAllByServer,
   togglePortDeletion,
+  updateBalance,
 };

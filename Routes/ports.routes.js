@@ -266,4 +266,59 @@ router.delete("/:id", portsController.togglePortDeletion);
  */
 router.get("/server/:serverID", portsController.findAllByServer);
 
+/**
+ * @swagger
+ * /api/ports/balance/{id}:
+ *   put:
+ *     summary: Update the balance of a port by ID
+ *     tags:
+ *       - Ports
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Numeric ID of the port to update its balance
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Port'
+ *     responses:
+ *       200:
+ *         description: Success message indicating the balance was updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message (e.g., "Port balance updated successfully!")
+ *       404:
+ *         description: Port not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Error message (e.g., "Port with id=1 not found!")
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Error message (e.g., "Error updating port balance")
+ */
+
+router.put("/balance/:id", portsController.updateBalance);
+
 module.exports = router;
