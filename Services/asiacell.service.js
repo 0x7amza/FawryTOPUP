@@ -148,7 +148,7 @@ const updateBalance = async (port) => {
   }
   const response = await serverUtils.sendUssd({
     host: port.Server.host,
-    port: port.Server.ServerPort,
+    port: port.Server.port,
     portNumber: port.portNumber,
     username: port.Server.username,
     password: port.Server.password,
