@@ -110,7 +110,7 @@ const invertServerDeletion = (req, res) => {
   const id = req.params.id;
 
   Server.update(
-    { isDeleted: Sequelize.literal("NOT isDeleted") },
+    { isDeleted: db.Sequelize.literal("NOT isDeleted") },
     { where: { id: id } }
   )
     .then((num) => {

@@ -1,82 +1,108 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../Models");
-const rechargeService = require("../Services/recharge.service");
 
-router.post("/", async (req, res) => {
-  const { RequestId, PhoneNumber, Amount, portID } = req.body;
-  if (!RequestId || !PhoneNumber || !Amount || !portID) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
-  const checkID = await db.Recharge.findOne({
-    where: { RequestId },
-  });
-  if (checkID) {
-    return res.status(200).json({ recharge: checkID });
-  }
-  const port = await db.Ports.findByPk(portID, {
-    include: [{ model: db.Company }, { model: db.Server }],
-  });
-  if (!port) {
-    return res.status(400).json({ error: "Invalid portID" });
-  }
+const rechargeController = require("../Controllers/recharge.controller");
 
-  await db.Recharge.create({
-    RequestId,
-    phoneNumber: PhoneNumber,
-    amount: Amount,
-    companyID: port.companyID,
-    type: port.type,
-    status: "pending",
-    PIN: null,
-    portID,
-    serial: null,
-  });
-  const response = await rechargeService.recharge({
-    PhoneNumber,
-    Amount,
-    port,
-  });
+/**
+ * @swagger
+ * /api/recharge:
+ *   get:
+ *     tags: [Recharge]
+ *     summary: Retrieve a list of recharge requests with pagination
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Maximum number of records to return
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number to retrieve
+ *     responses:
+ *       200:
+ *         description: A list of recharge requests
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Recharge'
+ */
+router.get("/", rechargeController.getAll);
 
-  if (response.success) {
-    await db.Recharge.update(
-      {
-        response: response.result,
-        status: "success",
-        serial: response.data.transactionNumber
-          ? response.data.transactionNumber
-          : null,
-      },
-      { where: { RequestId } }
-    );
-    await db.Ports.update(
-      {
-        balance: response.data.currentBalance
-          .replaceAll(",", "")
-          .replace(".000", ""),
-      },
-      { where: { id: response.data.portID } }
-    );
-  } else {
-    await db.Recharge.update(
-      {
-        response: response.result,
-        status: "failed",
-      },
-      { where: { RequestId } }
-    );
-  }
+/**
+ * @swagger
+ * /api/recharge/{RequestId}:
+ *   get:
+ *     tags: [Recharge]
+ *     summary: Retrieve a specific recharge request by ID
+ *     parameters:
+ *       - in: path
+ *         name: RequestId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The unique identifier of the recharge request
+ *     responses:
+ *       200:
+ *         description: The recharge request details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Recharge'
+ */
+router.get("/:RequestId", rechargeController.get);
 
-  const recharge = await db.Recharge.findOne({
-    where: { RequestId },
-  });
-  var statuscode = 200;
-  if (recharge.status === "failed") {
-    statuscode = 500;
-  } else if (recharge.status === "pending") {
-    statuscode = 202;
-  }
-  res.status(statuscode).json(recharge);
-});
+/**
+ * @swagger
+ * /api/recharge:
+ *   post:
+ *     tags: [Recharge]
+ *     summary: Create a new recharge request
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               RequestId:
+ *                 type: integer
+ *                 description: Unique identifier for the recharge request
+ *               PhoneNumber:
+ *                 type: string
+ *                 description: Phone number to be recharged
+ *               Amount:
+ *                 type: integer
+ *                 description: Recharge amount
+ *               portID:
+ *                 type: integer
+ *                 description: ID of the port associated with the recharge
+ *             required: [RequestId, PhoneNumber, Amount, portID]
+ *     responses:
+ *       200:
+ *         description: Recharge request processed successfully (existing or success)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Recharge'
+ *       202:
+ *         description: Recharge request is pending
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Recharge'
+ *       500:
+ *         description: Recharge request failed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Recharge'
+ */
+router.post("/", rechargeController.recharge);
 
 module.exports = router;
