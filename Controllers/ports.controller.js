@@ -166,7 +166,7 @@ const updateBalance = async (req, res) => {
     });
     return;
   }
-  const Balance = 0;
+  let Balance = "";
   switch (port.Company.name) {
     case "اسياسيل":
       Balance = await Asiacell.updateBalance(port);
@@ -175,7 +175,7 @@ const updateBalance = async (req, res) => {
       Balance = await Zain.updateBalance(port);
       break;
     case "كورك":
-      port.balance = req.body.balance;
+      Balance = await korek.checkBalance(port);
       break;
     default:
       res.status(400).send({
@@ -183,6 +183,9 @@ const updateBalance = async (req, res) => {
       });
       return;
   }
+  res.send({
+    Balance,
+  });
 };
 
 module.exports = {
