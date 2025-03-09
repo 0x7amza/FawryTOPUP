@@ -93,7 +93,7 @@ const update = (req, res) => {
           message: "Server was updated successfully.",
         });
       } else {
-        res.send({
+        res.status(404).send({
           message: `Cannot update Server with id=${id}. Maybe Server was not found or req.body is empty!`,
         });
       }

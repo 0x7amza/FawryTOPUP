@@ -121,7 +121,7 @@ const update = (req, res) => {
           message: "Port was updated successfully.",
         });
       } else {
-        res.send({
+        res.status(404).send({
           message: `Cannot update Port with id=${id}. Maybe Port was not found or req.body is empty!`,
         });
       }
@@ -146,7 +146,7 @@ const togglePortDeletion = (req, res) => {
           message: "Port toggled successfully!",
         });
       } else {
-        res.send({
+        res.status(400).send({
           message: `Cannot toggle Port with id=${id}. Maybe Port was not found!`,
         });
       }
