@@ -178,7 +178,7 @@ router.put("/:id", serverController.update);
  * @swagger
  * /api/servers/{id}:
  *   delete:
- *     summary: Toggle the deletion status of a server by ID
+ *     summary: remove a server by ID
  *     tags: [Servers]
  *     parameters:
  *       - in: path
@@ -197,7 +197,7 @@ router.put("/:id", serverController.update);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: Success message (e.g., "Server toggled successfully!")
+ *                   description: Success message (e.g., "Port was deleted successfully!")
  *       404:
  *         description: Server not found
  *         content:
@@ -207,7 +207,7 @@ router.put("/:id", serverController.update);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: Error message (e.g., "Server with id=1 not found!")
+ *                   description: Error message (e.g., `Cannot delete Server with id=1. Maybe Server was not found!`)
  *       500:
  *         description: Server error
  *         content:
@@ -217,8 +217,8 @@ router.put("/:id", serverController.update);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: Error message (e.g., "Error toggling server status")
+ *                   description: Error message (e.g., "Could not delete Server with id=1")
  */
-router.delete("/:id", serverController.invertServerDeletion);
+router.delete("/:id", serverController.remove);
 
 module.exports = router;

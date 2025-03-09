@@ -178,7 +178,7 @@ router.put("/:id", portsController.update);
  * @swagger
  * /api/ports/{id}:
  *   delete:
- *     summary: Toggle the deletion status of a port by ID
+ *     summary: remove a port by ID
  *     tags: [Ports]
  *     parameters:
  *       - in: path
@@ -197,7 +197,7 @@ router.put("/:id", portsController.update);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: Success message (e.g., "Port toggled successfully!")
+ *                   description: Success message (e.g., "Port was deleted successfully!")
  *       404:
  *         description: Port not found
  *         content:
@@ -207,7 +207,7 @@ router.put("/:id", portsController.update);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: Error message (e.g., "Port with id=1 not found!")
+ *                   description: Error message (e.g., "Cannot delete Port with id=1. Maybe Port was not found!")
  *       500:
  *         description: Server error
  *         content:
@@ -217,9 +217,9 @@ router.put("/:id", portsController.update);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: Error message (e.g., "Error toggling port status")
+ *                   description: Error message (e.g., "Could not delete Port with id=1")
  */
-router.delete("/:id", portsController.togglePortDeletion);
+router.delete("/:id", portsController.remove);
 
 /**
  * @swagger

@@ -131,10 +131,34 @@ const invertServerDeletion = (req, res) => {
     });
 };
 
+const remove = async (req, res) => {
+  const id = req.params.id;
+
+  Server.destroy({
+    where: { id: id },
+  })
+    .then((num) => {
+      if (num == 1) {
+        res.send({
+          message: "Server was deleted successfully!",
+        });
+      } else {
+        res.status(404).send({
+          message: `Cannot delete Server with id=${id}. Maybe Server was not found!`,
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: "Could not delete Server with id=" + id,
+      });
+    });
+};
+
 module.exports = {
   create,
   findAll,
   findOne,
   update,
-  invertServerDeletion,
+  remove,
 };

@@ -203,6 +203,31 @@ const updateBalance = async (req, res) => {
     });
   }
 };
+
+const remove = (req, res) => {
+  const id = req.params.id;
+
+  Ports.destroy({
+    where: { id: id },
+  })
+    .then((num) => {
+      if (num == 1) {
+        res.send({
+          message: "Port was deleted successfully!",
+        });
+      } else {
+        res.status(404).send({
+          message: `Cannot delete Port with id=${id}. Maybe Port was not found!`,
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: "Could not delete Port with id=" + id,
+      });
+    });
+};
+
 module.exports = {
   create,
   findAll,
@@ -211,4 +236,5 @@ module.exports = {
   findAllByServer,
   togglePortDeletion,
   updateBalance,
+  remove,
 };
