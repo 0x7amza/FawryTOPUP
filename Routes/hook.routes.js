@@ -43,7 +43,7 @@ router.get("/", async (req, res) => {
   switch (sender) {
     case "ZAIN-IQ":
       hookUtils.save({ sender, content: Content });
-      ZainService.webhook({ content: Content, portNumber, portID: 1 });
+      ZainService.webhook({ content: Content, portNumber, portID: portID });
       break;
     case "Korek":
       hookUtils.save({ sender, content: Content });
