@@ -61,11 +61,11 @@ router.get("/", rechargeController.getAll);
  *             schema:
  *               type: object
  *               properties:
- *                 message:
+ *                 error:
  *                   type: string
  *                   description: Error message
  *               example:
- *                 message: "Recharge not found"
+ *                 error: "Recharge not found"
  */
 router.get("/:RequestId", rechargeController.get);
 
