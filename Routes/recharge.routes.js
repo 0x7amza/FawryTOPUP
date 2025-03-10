@@ -49,21 +49,23 @@ router.get("/", rechargeController.getAll);
  *         description: The unique identifier of the recharge request
  *     responses:
  *       200:
- *         description: The recharge request details
+ *         description: Successful operation
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Recharge'
  *       404:
- *          description: Recharge request not found
- *          content:
- *              application/json:
- *                  schema:
- *                      type: object
- *                      properties:
- *                      message:
- *                      type: string
- *                      description: Error message
+ *         description: Recharge request not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Error message
+ *               example:
+ *                 message: "Recharge not found"
  */
 router.get("/:RequestId", rechargeController.get);
 
