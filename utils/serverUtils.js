@@ -1,5 +1,6 @@
 // utils/serverUtils.js
 const axios = require("axios");
+const { log } = require("winston");
 
 const sendUssd = async (queryParam) => {
   try {
@@ -20,9 +21,10 @@ const sendUssd = async (queryParam) => {
         port: queryParam.portNumber,
         ussd: encodeURIComponent(queryParam.ussd),
       },
-      timeout: 30000,
+      timeout: 20000,
     });
 
+    console.log(response.data);
     if (response.data.error) {
       throw new Error(`Server Error: ${response.data.error}`);
     }
@@ -77,6 +79,7 @@ const sendSms = async (queryParam) => {
     };
 
     const response = await axios(config);
+    console.log("sendSms response:", response.data);
 
     if (response.data.error) {
       throw new Error(`Server Error: ${response.data.error}`);
