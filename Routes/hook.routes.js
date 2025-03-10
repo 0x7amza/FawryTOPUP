@@ -6,11 +6,18 @@ const KorekService = require("../Services/korek.service");
 const db = require("../Models");
 const Ports = db.Ports;
 
+const getIPv4 = (ip) => {
+  if (ip.includes(".")) return ip.replace(/^::ffff:/, "");
+  return "IPv6 Detected";
+};
+
 router.get("/", async (req, res) => {
   const { query } = req;
   const { sender } = query;
 
-  const ip = req.ip || req.connection.remoteAddress;
+  const ip = getIPv4(
+    req.headers["x-forwarded-for"] || req.ip || req.connection.remoteAddress
+  );
   console.log(`IP المرسل: ${ip}`);
 
   const ContentTemp = query.content.split(/\r?\n/);
@@ -28,6 +35,10 @@ router.get("/", async (req, res) => {
       },
     ],
   });
+  if (!port) {
+    res.send("hook");
+    return;
+  }
   const portID = port.id;
   switch (sender) {
     case "ZAIN-IQ":

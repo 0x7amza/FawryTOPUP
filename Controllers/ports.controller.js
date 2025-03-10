@@ -159,48 +159,57 @@ const togglePortDeletion = (req, res) => {
 };
 
 const updateBalance = async (req, res) => {
-  const id = req.params.id;
-  const port = await Ports.findByPk(id, {
-    include: ["Server", "Company"],
-  });
-
-  if (!port) {
-    return res.status(404).send({
-      message: "Port not found with id " + id,
+  try {
+    const id = req.params.id;
+    const port = await Ports.findByPk(id, {
+      include: ["Server", "Company"],
     });
-  }
 
-  let newBalance = undefined;
-  switch (port.Company.name) {
-    case "اسياسيل":
-      newBalance = await Asiacell.updateBalance(port);
-      break;
-    case "زين":
-      newBalance = await Zain.updateBalance(port).balance;
-      break;
-    case "كورك":
-      newBalance = await korek.checkBalance(port).balance;
-      break;
-    default:
-      return res.status(400).send({
-        message: "Unsupported company",
+    if (!port) {
+      return res.status(404).send({
+        message: "Port not found with id " + id,
       });
-  }
-  console.log(newBalance);
+    }
 
-  if (!newBalance && typeof newBalance === "number" && !isNaN(newBalance)) {
-    port.balance = newBalance;
-    await port.save();
-    return res.status(200).send({
-      message: "Balance updated successfully",
-      balance: newBalance,
-      portID: port.id,
-    });
-  } else {
+    let newBalance;
+    switch (port.Company.name) {
+      case "اسياسيل":
+        newBalance = await Asiacell.updateBalance(port);
+        break;
+      case "زين":
+        newBalance = (await Zain.updateBalance(port)).balance;
+        break;
+      case "كورك":
+        newBalance = (await korek.checkBalance(port)).balance;
+        break;
+      default:
+        return res.status(400).send({
+          message: "Unsupported company",
+        });
+    }
+
+    console.log("Returned balance:", newBalance);
+
+    if (typeof newBalance === "number" && !isNaN(newBalance)) {
+      port.balance = newBalance;
+      await port.save();
+      return res.status(200).send({
+        message: "Balance updated successfully",
+        balance: newBalance,
+        portID: port.id,
+      });
+    } else {
+      return res.status(500).send({
+        message: "Failed to update balance",
+        error: "Invalid response from service",
+        rawBalance: newBalance,
+      });
+    }
+  } catch (error) {
+    console.error("Error updating balance:", error);
     return res.status(500).send({
-      message: "Failed to update balance",
-      error: "Invalid response from service",
-      rawBalance: newBalance,
+      message: "Internal Server Error",
+      error: error.message,
     });
   }
 };
