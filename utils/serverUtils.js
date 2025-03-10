@@ -24,14 +24,12 @@ const sendUssd = async (queryParam) => {
       timeout: 20000,
     });
 
-    console.log(response.data);
     if (response.data.error) {
       throw new Error(`Server Error: ${response.data.error}`);
     }
 
     return response.data;
   } catch (error) {
-    console.error("sendUssd Error:", error.message);
     return {
       error: true,
       message: error.message,
@@ -79,7 +77,6 @@ const sendSms = async (queryParam) => {
     };
 
     const response = await axios(config);
-    console.log("sendSms response:", response.data);
 
     if (response.data.error) {
       throw new Error(`Server Error: ${response.data.error}`);
@@ -87,7 +84,6 @@ const sendSms = async (queryParam) => {
 
     return response.data;
   } catch (error) {
-    console.error("sendSms Error:", error.message);
     return {
       error: true,
       message: error.message,
