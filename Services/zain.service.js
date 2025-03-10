@@ -15,6 +15,8 @@ const recharges = async ({ phone, amount, type, companyID, PIN }) => {
 };
 
 const ETopUpRecharge = async ({ phone, amount, port }) => {
+  console.log({ port });
+
   const sendSms = await serverUtils.sendSms({
     phone,
     amount,
