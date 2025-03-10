@@ -1,3 +1,4 @@
+const { log } = require("winston");
 const db = require("../Models");
 const portUtils = require("../utils/portIUtils");
 const serverUtils = require("../utils/serverUtils");
@@ -80,7 +81,7 @@ const webhook = async ({ content, portNumber, portID }) => {
   const zainMap = zainSmsResponses.get(
     portNumber.toString() + portID.toString()
   );
-
+  console.log({ zainMap, successMatch, balanceMatch });
   if (successMatch && zainMap?.phone === successMatch[1]) {
     const [phone, amount, date, currentBalance, transaction] = successMatch;
     const numericBalance = parseFloat(currentBalance.replace(/,/g, "")) || 0;
