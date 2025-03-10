@@ -81,7 +81,7 @@ const sendSms = async (queryParam) => {
     if (response.data.error) {
       throw new Error(`Server Error: ${response.data.error}`);
     }
-
+    console.log(response.data);
     return response.data;
   } catch (error) {
     return {
