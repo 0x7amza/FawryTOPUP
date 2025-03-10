@@ -25,14 +25,12 @@ const GBRecharge = async ({ phone, amount, port }) => {
 
   const response = await serverUtils.sendUssd(queryParam);
   if (!response.resp) {
-    await portUtils.endProcess({ portID: port.id });
     return {
       success: false,
       result: "Recharge Failed",
       data: {
         phone,
         amount,
-        portID: port.id,
       },
     };
   }

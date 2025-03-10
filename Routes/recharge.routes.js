@@ -54,6 +54,16 @@ router.get("/", rechargeController.getAll);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Recharge'
+ *       404:
+ *          description: Recharge request not found
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                      message:
+ *                      type: string
+ *                      description: Error message
  */
 router.get("/:RequestId", rechargeController.get);
 

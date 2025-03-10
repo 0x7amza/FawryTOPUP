@@ -26,6 +26,16 @@ const ETopUpRecharge = async ({ phone, amount, port }) => {
     username: port.Server.username,
     password: port.Server.password,
   });
+  if (!sendSms.resp) {
+    return {
+      success: false,
+      result: "Recharge Failed",
+      data: {
+        phone,
+        amount,
+      },
+    };
+  }
   const newPhone = phone.replace(/^./, "964");
   const result = await new Promise((resolve, reject) => {
     zainSmsResponses.set(port.portNumber.toString() + port.id.toString(), {

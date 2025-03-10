@@ -1,61 +1,96 @@
+// utils/serverUtils.js
 const axios = require("axios");
 
 const sendUssd = async (queryParam) => {
-  const response = await axios.get(
-    "http://" +
-      queryParam.host.toString() +
-      ":" +
-      queryParam.port +
-      "/goip_send_ussd.html?username=" +
-      queryParam.username +
-      "&password=" +
-      encodeURIComponent(queryParam.password) +
-      "&port=" +
-      queryParam.portNumber.toString() +
-      "&ussd=" +
-      encodeURIComponent(queryParam.ussd)
-  );
+  try {
+    if (
+      !queryParam.host ||
+      !queryParam.port ||
+      !queryParam.username ||
+      !queryParam.password
+    ) {
+      throw new Error("Missing required server parameters");
+    }
 
-  return response.data;
+    const url = `http://${queryParam.host}:${queryParam.port}/goip_send_ussd.html`;
+    const response = await axios.get(url, {
+      params: {
+        username: queryParam.username,
+        password: encodeURIComponent(queryParam.password),
+        port: queryParam.portNumber,
+        ussd: encodeURIComponent(queryParam.ussd),
+      },
+      timeout: 30000,
+    });
+
+    if (response.data.error) {
+      throw new Error(`Server Error: ${response.data.error}`);
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("sendUssd Error:", error.message);
+    return {
+      error: true,
+      message: error.message,
+      details: error.response?.data || "No server response",
+    };
+  }
 };
 
 const sendSms = async (queryParam) => {
-  const data = {
-    type: "send-sms",
-    task_num: 1,
-    tasks: [
-      {
-        tid: 1223,
-        from: queryParam.portNumber + ".01",
-        to: queryParam.to,
-        sms: queryParam.sms,
+  try {
+    if (
+      !queryParam.host ||
+      !queryParam.port ||
+      !queryParam.username ||
+      !queryParam.password ||
+      !queryParam.to ||
+      !queryParam.sms
+    ) {
+      throw new Error("Missing required SMS parameters");
+    }
+
+    const data = {
+      type: "send-sms",
+      task_num: 1,
+      tasks: [
+        {
+          tid: 1223,
+          from: `${queryParam.portNumber}.01`,
+          to: queryParam.to,
+          sms: queryParam.sms,
+        },
+      ],
+    };
+
+    const config = {
+      method: "post",
+      url: `http://${queryParam.host}:${queryParam.port}/goip_post_sms.html`,
+      params: {
+        username: queryParam.username,
+        password: queryParam.password,
       },
-    ],
-  };
-  console.log(queryParam);
+      headers: { "Content-Type": "application/json" },
+      data: data,
+      timeout: 15000,
+    };
 
-  let config = {
-    method: "post",
-    maxBodyLength: Infinity,
-    url:
-      "http://" +
-      queryParam.host +
-      ":" +
-      queryParam.port +
-      "/goip_post_sms.html?username=" +
-      queryParam.username +
-      "&password=" +
-      queryParam.password,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    data: data,
-  };
-  const response = await axios.request(config);
-  return response.data;
+    const response = await axios(config);
+
+    if (response.data.error) {
+      throw new Error(`Server Error: ${response.data.error}`);
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("sendSms Error:", error.message);
+    return {
+      error: true,
+      message: error.message,
+      details: error.response?.data || "No server response",
+    };
+  }
 };
 
-module.exports = {
-  sendUssd,
-  sendSms,
-};
+module.exports = { sendUssd, sendSms };

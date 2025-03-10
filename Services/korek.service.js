@@ -11,20 +11,22 @@ const korekBalancePattern = /KT:eTopUP:([\d,]+(?:\.\d+)?)\sIQD/i;
 
 // دالة الشحن الإلكتروني
 const recharges = async ({ phone, amount, port }) => {
-  switch (port.type.toLowerCase()) {
-    case "TopUp":
-      return await ETopUpRecharge({ phone, amount, port });
-    default:
-      return { success: false, message: "Invalid recharge type" };
+  try {
+    switch (port.type.toLowerCase()) {
+      case "topup":
+        return await ETopUpRecharge({ phone, amount, port });
+      default:
+        return { success: false, message: "Invalid recharge type" };
+    }
+  } catch (error) {
+    return { success: false, message: error.message };
   }
 };
 
-// تنفيذ عملية الشحن
 const ETopUpRecharge = async ({ phone, amount, port }) => {
-  const ussdCode = `*602*1*${phone}*${amount}*${port.simPassword}*1#`;
-
   try {
-    await serverUtils.sendUssd({
+    const ussdCode = `*602*1*${phone}*${amount}*${port.simPassword}*1#`;
+    const response = await serverUtils.sendUssd({
       host: port.Server.host,
       port: port.Server.port,
       portNumber: port.portNumber,
@@ -33,16 +35,34 @@ const ETopUpRecharge = async ({ phone, amount, port }) => {
       ussd: ussdCode,
     });
 
-    // انتظار نتيجة الشحن
-    return await new Promise((resolve, reject) => {
+    if (!response.resp) {
+      return {
+        success: false,
+        result: "Recharge Failed",
+        data: {
+          phone,
+          amount,
+        },
+      };
+    }
+
+    return new Promise((resolve, reject) => {
       korekSmsResponses.set(port.id.toString(), { resolve, reject });
+
       setTimeout(() => {
         korekSmsResponses.delete(port.id.toString());
-        reject({ success: false, message: "Recharge timed out" });
+        reject("Recharge timed out");
       }, 60000);
     });
   } catch (error) {
-    return { success: false, message: "USSD Sending Failed" };
+    return {
+      success: false,
+      result: "Recharge Failed - error message : " + error.message,
+      data: {
+        phone,
+        amount,
+      },
+    };
   }
 };
 

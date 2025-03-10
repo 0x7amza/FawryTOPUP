@@ -20,6 +20,9 @@ const get = async (req, res) => {
   const recharge = await db.Recharge.findOne({
     where: { RequestId },
   });
+  if (!recharge) {
+    res.status(404).json({ error: "Recharge not found" });
+  }
   res.send(recharge);
 };
 
