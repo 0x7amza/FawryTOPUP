@@ -24,8 +24,7 @@ const ETopUpRecharge = async ({ phone, amount, port }) => {
     username: port.Server.username,
     password: port.Server.password,
   });
-  console.log({ sendSms });
-  if (!sendSms.resp) {
+  if (sendSms.code !== 200) {
     return {
       success: false,
       result: "Recharge Failed",
