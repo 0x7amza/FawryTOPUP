@@ -4,6 +4,7 @@ const Korek = require("./korek.service");
 
 const recharge = async ({ PhoneNumber, Amount, port }) => {
   try {
+    console.log({ port });
     switch (port.Company.name) {
       case "اسياسيل":
         return Asiacell.recharges({ phone: PhoneNumber, amount: Amount, port });
