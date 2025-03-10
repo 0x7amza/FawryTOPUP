@@ -3,8 +3,8 @@ const portUtils = require("../utils/portIUtils");
 const serverUtils = require("../utils/serverUtils");
 const zainSmsResponses = new Map();
 
-const recharges = async ({ phone, amount, type, companyID, PIN }) => {
-  console.log(type);
+const recharges = async ({ phone, amount, type }) => {
+  console.log({ phone, amount, type });
 
   switch (port.type.toLowerCase()) {
     case "topup":
