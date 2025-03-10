@@ -170,7 +170,7 @@ const updateBalance = async (req, res) => {
     });
   }
 
-  let newBalance;
+  let newBalance = undefined;
   switch (port.Company.name) {
     case "اسياسيل":
       newBalance = await Asiacell.updateBalance(port);
@@ -186,8 +186,9 @@ const updateBalance = async (req, res) => {
         message: "Unsupported company",
       });
   }
+  console.log(newBalance);
 
-  if (typeof newBalance === "number" && !isNaN(newBalance)) {
+  if (!newBalance && typeof newBalance === "number" && !isNaN(newBalance)) {
     port.balance = newBalance;
     await port.save();
     return res.status(200).send({
