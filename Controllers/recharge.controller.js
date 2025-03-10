@@ -15,8 +15,10 @@ const getAll = async (req, res) => {
 };
 
 const get = async (req, res) => {
+  const { RequestId } = req.params;
+
   const recharge = await db.Recharge.findOne({
-    RequestId: req.params.RequestId,
+    where: { RequestId },
   });
   res.send(recharge);
 };
