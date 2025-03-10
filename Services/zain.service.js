@@ -63,10 +63,11 @@ const ETopUpRecharge = async ({ phone, amount, port }) => {
   return result;
 };
 const webhook = async ({ content, portNumber, portID }) => {
-  const cleanMessage = content
-    .normalize("NFKC")
-    .replace(/[\u200B-\u200D\uFEFF]/g, "")
-    .trim();
+  const cleanMessage =
+    "﻿The number 9647825566552 has been successfully recharged with﻿ 1,000.000 IQD on 10/03/25 09:37 PM Your current balance is﻿ 1,794,000.000 IQD.Transaction number CCA00VFEGE"
+      .normalize("NFKC")
+      .replace(/[\u200B-\u200D\uFEFF]/g, "")
+      .trim();
 
   // 1. نمط النجاح (شحن الرصيد)
   const successPattern =
